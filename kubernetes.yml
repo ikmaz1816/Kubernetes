@@ -1,0 +1,405 @@
+#################################################Kubernetes############################################################
+Kubernetes is a container orchestration tool.
+With this container can easily be scaled and descaled on the basis of requirement or schedule.
+Some features of kubernetes:
+Container Orchestration
+Availability
+Scalability 
+Load Balancing
+
+To install kubernetes you have to visit the kubernetes website and follow the instructions!
+(Use chocolatey for easy installation process)
+
+#Kubernetes architecture
+Kubernetes architecture is divided into two parts 
+Master node 
+Workder node
+
+A node is nothing but a physical machine which acts a host to run the containers 
+
+Master node 
+Master node acts same as that of the control plane in the router 
+It is responsible for assigning container to different worker nodes, bringing up nodes that 
+have gone down and managing of the cluster is taken care by the master node itself.
+
+Components of Master Node
+
+Kube-ApiServer
+It is the entry point in the kubernetes cluster , any request has to first pass through the 
+kube-apiserver and then only it can enter the cluster!
+
+Kube-schedular
+It is responsible for assigning containers to the worker nodes!
+
+etcd 
+It is a distributed key value pair system that is used to store information about nodes,
+application running in container etc
+
+controller-manager
+It is used to take care of containers. If one containers goes down then it is the responsibility
+of controller-manager to bring it up.With that it also monitors the worker nodes as well.
+
+Components of worker node
+container runtime 
+To run container on any machine or node it is necessary to have a runtime.So node has containerd
+previously it was docker.
+
+pod
+it is a framework used to run the container 
+
+kubelet 
+It is used to check whether the pod is running successfully 
+
+kube-proxy 
+It is a networking component used for the purpose of node to node commuication or any other 
+communication inside a cluster 
+
+This is the architecture design of a kubernetes cluster
+
+#to start the cluster 
+minikube start 
+
+#to delete a cluster 
+minikube delete 
+
+#to see status
+minikube status
+
+#to see all the information related to cluster 
+minikube dashboard 
+
+#if we have a service 
+minikube service service-name 
+#this gives us the url for accessing the frontend 
+
+#to create a deployment 
+kubectl create deployment deployment-name(it can be anything) --image=name of image(will be 
+picked from docker registry)
+
+#if we want to change the image 
+kubectl set image deployment deployment-name container-name=new name of image
+#to get name of container 
+kubectl get pods  
+
+#if we want to scale our application 
+kubectl scale deployment deployment-name --replicas=3
+
+#Whenever you create a deployment it is creates one pod one replica 
+#If you scale then the number of replicaset woul change 
+
+#to descale same command just decrease the number of replicas 
+kubectl scale deployment deployment-name --replicas=1
+
+#to rollback 
+kubectl rollout undo deployment deployment-name
+
+#to get all 
+kubectl get all 
+
+#to get deployments
+kubectl get deployments 
+
+#to get information deployments 
+kubectl describe deployment deployment-name
+
+#to get pods 
+kubectl get pods 
+
+#to get nodes
+kubectl get nodes
+
+#to describe 
+kubectl describe pods pod-name 
+
+#now when we create deployment it is necessary to create a service that can interact with other
+#pods 
+
+kubectl expose deployment deployment-name --type=LoadBalancer --port=80
+
+#This would create a service to interact with the outside world 
+kubectl get services 
+
+#to describe a service
+kubectl describe service service-name 
+
+#to delete a deployment 
+kubectl delete deployment deployments-name
+#All the pods will be deleted with this that were create with deployment
+
+#to delete a service 
+kubectl delete service service-name
+
+This are all the basic commands used 
+
+A pod is a framework to run the container inside it. 
+A pod can have multiple containers running inside it.
+There can be a pod for application and other pod for getting data from this application
+sending it to some third party tool.
+Same type of pods can be present in different nodes and the cluster manages it 
+
+Replica set 
+It is used to manage same type of pods that can be present in different worker nodes.
+The idea of replicaset is to increase the availability of the application.
+Pod is associated with the worker node but the replicaset is present inside the cluster and has
+information about all the pods that can be present in different worker nodes.
+
+Services:
+A service is basically created in order to make communication possible between pods in a cluster.
+There are three types:
+
+ClusterIP 
+This is used for internal communication.
+For example spring boot application wants to interact with mysql database
+
+NodePort
+This is used for client facing communication
+For example our endpoints which gives httpResponse.
+
+LoadBalancer
+This can be used for internal or external commuication.
+It is used for balancing load and commonly used!
+
+The above commands that we saw were imperative approach of creating a deployment or pods etc.
+The declarative approach is to create a file.yml which will be contain the information about 
+the type and what to create.
+
+There are four main types:
+apiVersion:
+This specifies the version to use on the basis of kind.
+If it is pod or service or configMap-> use v1 for deployment and Replicaset use apps/v1
+
+kind:
+it is used to specify the type of object 
+We have 
+Pod 
+Service 
+Deployment 
+Replicaset etc
+These are case sensitive 
+
+metadata:
+this is used to specify key value pair 
+
+spec:
+Contains the information about various configurations that we will be using 
+
+#Creating a pod file 
+apiVersion: v1
+kind: Pod 
+metadata:
+  name: first-pod
+  labels: 
+	name: first-pod 
+	app: backend 
+spec:
+  container:
+	- name: python 
+	  image: python 
+	  port:
+	   - containersPort:80 
+
+#to create a replica set 
+apiVersion: apps/v1
+kind: Pod 
+metadata:
+  name: first-pod
+  labels: 
+	name: first-pod 
+	app: backend 
+spec:
+  container:
+	- name: python 
+	  image: python 
+	  ports:
+	   - containersPort:80 
+  replicas: 3
+  selector:
+	matchLabels:
+	  #specify labels from metadata
+	  name: first-pod 
+	  app: backend 
+
+#Creating a service 
+apiVersion: v1
+kind: Service 
+metadata:
+  name: pod-service 
+spec:
+  type: ClusterIP 
+  ports:
+    - port: 80
+	  targetPort: 80
+  selector:
+	name: first-pod 
+	app: backend 
+	
+By default it is ClusterIP , if we want to have NodePort 
+type: NodePort 
+ports:
+  - port: 80
+	targetPort: 80
+	nodePort: 30008
+	
+NodePort has to be in the valid range of 30001 to 32600(Please check for the correct range)
+Here only port is mandatory, target port will be the same as that of the port and nodePort
+will be taken from the availabile valid range.
+
+For LoadBalancer 
+type: LoadBalancer 
+ports:
+  - name: http or tcp
+	port: 80
+	targetPort: 80
+	
+Service gets attached to the pod via the selectors so be careful while creating one!
+
+#Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  template:
+	metadata:
+	  name: first-pod
+	  app: backend
+	spec:
+	  container:
+		- name: python
+		  image: python 
+		  ports:
+		   - containerPort: 80
+	  replicas: 3 
+	  selector:
+	    matchLabels: 
+		  name: first-pod
+		  app: backend
+		  
+#This is to create the deployment file 
+If you want to specify some environment variables then 
+spec:
+  env:
+    - name: MYSQL_ROOT_PASSWORD
+	  value: "admin"
+	- name: MYSQL_DATABASE
+	  value: "project"
+
+to create deployment 
+kubectl create -f filename.yml
+
+if changes made then 
+kubectl apply -f filename.yml 
+
+
+#config-map
+It is use to store non-confidential data 
+
+apiVersion: v1 
+kind: ConfigMap
+metadata: 
+  name: config-map
+data:
+  MYSQL_DATABASE: "project"
+  
+Now in the deployment.yml file 
+container:
+  env:
+   - name:MYSQL_DATABASE
+     valueFrom:
+	   configMapKeyRef:
+	    - name: config-map
+		  key: MYSQL_DATABASE
+
+#Secrets 
+Secrects are used to store confidential data
+apiVersion: v1 
+kind: Secret
+metadata: 
+  name: config-map
+data:
+  MYSQL_DATABASE: "project"
+  
+Now in container
+container:
+  env:
+   - name:MYSQL_DATABASE
+     valueFrom:
+	   secretKeyRef:
+	    - name: config-map
+		  key: MYSQL_DATABASE
+		  
+#Remeber that the application.properties mentioned in spring boot should be the same in the 
+.yml file as well 
+Url,username and password
+
+Volumes in kubernetes 
+Volumes play a crucial role. Now when we store data it is stored inside the container, so 
+eventually when a container or pod goes down the data will be lost.
+So we create persistent volume which are not lost even when the data is lost 
+
+to create a persistent volume ->
+
+Create a persistent volume -> Create a persistent volume claim -> Mount in the database.yml file
+
+#persistent volume 
+apiVersion: v1
+kind: PersistentVolume 
+metadata:
+  name: my-volume 
+spec:
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /data/
+	type: DirectoryOrCreated
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  
+hostPath can only be used for single node or for testing purpose.
+
+for mulitnode cluster use 
+apiVersion: v1
+kind: PersistentVolume 
+metadata:
+  name: my-volume 
+spec:
+  capacity:
+    storage: 1Gi
+  local:
+    path: /data/
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  
+#PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim 
+metadata:
+  name: volume-claim
+spec:
+  volumeName: my-volume (refers to the PersistentVolume.yml)
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+	  storage: 0.5Gi
+	  
+#Now in the deployment file 
+containers:
+	volumeMount:
+	  - name: my-volume-1      (Name of the persistent volume declared below)
+	    path: /var/lib/mysql  (Data where is stored in mysql)
+volumes:
+  - name: my-volume-1
+    persistentVolumeClaim:
+	  claimName: my-volume  (refers to PersistentVolumeClaim.yml)
+
+
+	
+
+
+	
+
+
