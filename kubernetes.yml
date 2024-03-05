@@ -7,6 +7,14 @@ Availability
 Scalability 
 Load Balancing
 
+#to install kubernetes use chocolatey
+wsl-install run command using administrative right in powershell
+choco install kubernetes-cli
+choco install minikube
+in C:\.kube file create a config file 
+in cmd run minikube start --driver=docker --no-vtx-check
+Not  to check for virtualization! 
+
 To install kubernetes you have to visit the kubernetes website and follow the instructions!
 (Use chocolatey for easy installation process)
 
