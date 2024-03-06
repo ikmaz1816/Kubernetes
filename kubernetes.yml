@@ -346,7 +346,7 @@ kind: Secret
 metadata: 
   name: config-map
 data:
-  MYSQL_DATABASE: "project"
+  MYSQL_DATABASE: "cHJvamVjdAo=" #encode the project with echo "project" | base64 -> gitbash
   
 Now in container
 container:
@@ -417,9 +417,9 @@ spec:
 	  
 #Now in the deployment file 
 containers:
-	volumeMount:
+	volumeMounts:
 	  - name: my-volume-1      (Name of the persistent volume declared below)
-	    path: /var/lib/mysql  (Data where is stored in mysql)
+	    mountPath: /var/lib/mysql  (Data where is stored in mysql)
 volumes:
   - name: my-volume-1
     persistentVolumeClaim:
