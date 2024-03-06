@@ -261,27 +261,48 @@ ports:
 	
 Service gets attached to the pod via the selectors so be careful while creating one!
 
-#Deployment
+For spring boot application
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-deployment
+  name: spring-boot-deployment
+  labels:
+    name: spring-boot-deployment
+    type: backend
 spec:
   template:
-	metadata:
-	  name: first-pod
-	  app: backend
-	spec:
-	  container:
-		- name: python
-		  image: python 
-		  ports:
-		   - containerPort: 80
-	  replicas: 3 
-	  selector:
-	    matchLabels: 
-		  name: first-pod
-		  app: backend
+    metadata:
+      name: spring-boot
+      labels:
+        name: spring-boot
+        type: backend
+    spec:
+      containers:
+        - name: app
+          image: ikmaz2023/my-springboot-docker-app:02
+          ports:
+            - containerPort: 8080
+  replicas: 3
+  selector:
+    matchLabels:
+      name: spring-boot
+      type: backend
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-service
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 8080
+      port: 8080
+      nodePort: 30008
+  selector:
+    name: spring-boot
+    type: backend
 		  
 #This is to create the deployment file 
 If you want to specify some environment variables then 
