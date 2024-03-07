@@ -12,8 +12,18 @@ wsl-install run command using administrative right in powershell
 choco install kubernetes-cli
 choco install minikube
 in C:\.kube file create a config file 
-in cmd run minikube start --driver=docker --no-vtx-check
+in cmd run 
+#minikube start --driver=docker --no-vtx-check
 Not  to check for virtualization! 
+
+to delete a minikube cluster
+# minikube delete
+
+to check status
+# minikube status
+
+to check dashboard
+# minikube dashboard
 
 To install kubernetes you have to visit the kubernetes website and follow the instructions!
 (Use chocolatey for easy installation process)
@@ -131,6 +141,9 @@ kubectl get services
 kubectl describe service service-name 
 
 #to delete a deployment 
+#to delete anything the basic syntax
+#kubectl delete keyword name 
+# deployment, pod , service , configMap, secret, persistentVolume, persistentVolumeClaim
 kubectl delete deployment deployments-name
 #All the pods will be deleted with this that were create with deployment
 
@@ -197,8 +210,8 @@ kind: Pod
 metadata:
   name: first-pod
   labels: 
-	name: first-pod 
-	app: backend 
+    name: first-pod 
+    app: backend 
 spec:
   container:
 	- name: python 
@@ -212,8 +225,8 @@ kind: Pod
 metadata:
   name: first-pod
   labels: 
-	name: first-pod 
-	app: backend 
+    name: first-pod 
+    app: backend 
 spec:
   container:
 	- name: python 
@@ -223,7 +236,7 @@ spec:
   replicas: 3
   selector:
 	matchLabels:
-	  #specify labels from metadata
+	  #specify labels from metadata of pod
 	  name: first-pod 
 	  app: backend 
 
@@ -236,17 +249,18 @@ spec:
   type: ClusterIP 
   ports:
     - port: 80
-	  targetPort: 80
+	    targetPort: 80
+  clusterIP: None
   selector:
-	name: first-pod 
-	app: backend 
+    name: first-pod 
+    app: backend 
 	
 By default it is ClusterIP , if we want to have NodePort 
 type: NodePort 
 ports:
   - port: 80
-	targetPort: 80
-	nodePort: 30008
+    targetPort: 80
+    nodePort: 30008
 	
 NodePort has to be in the valid range of 30001 to 32600(Please check for the correct range)
 Here only port is mandatory, target port will be the same as that of the port and nodePort
@@ -256,8 +270,8 @@ For LoadBalancer
 type: LoadBalancer 
 ports:
   - name: http or tcp
-	port: 80
-	targetPort: 80
+    port: 80
+    targetPort: 80
 	
 Service gets attached to the pod via the selectors so be careful while creating one!
 
@@ -310,8 +324,8 @@ spec:
   env:
     - name: MYSQL_ROOT_PASSWORD
 	  value: "admin"
-	- name: MYSQL_DATABASE
-	  value: "project"
+    - name: MYSQL_DATABASE
+      value: "project"
 
 to create deployment 
 kubectl create -f filename.yml
@@ -336,8 +350,8 @@ container:
    - name:MYSQL_DATABASE
      valueFrom:
 	   configMapKeyRef:
-	    - name: config-map
-		  key: MYSQL_DATABASE
+	      name: config-map
+		    key: MYSQL_DATABASE
 
 #Secrets 
 Secrects are used to store confidential data
@@ -354,8 +368,8 @@ container:
    - name:MYSQL_DATABASE
      valueFrom:
 	   secretKeyRef:
-	    - name: config-map
-		  key: MYSQL_DATABASE
+	      name: config-map
+		    key: MYSQL_DATABASE
 		  
 #Remeber that the application.properties mentioned in spring boot should be the same in the 
 .yml file as well 
@@ -380,7 +394,7 @@ spec:
     storage: 1Gi
   hostPath:
     path: /data/
-	type: DirectoryOrCreated
+	  type: DirectoryOrCreated
   accessModes:
     - ReadWriteOnce
   storageClassName: standard
@@ -413,7 +427,7 @@ spec:
   storageClassName: standard
   resources:
     requests:
-	  storage: 0.5Gi
+	    storage: 0.5Gi
 	  
 #Now in the deployment file 
 containers:
